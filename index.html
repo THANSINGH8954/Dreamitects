@@ -1,0 +1,376 @@
+<!-- ========================= -->
+<!-- LOGIN / SIGNUP SECTION -->
+<!-- ========================= -->
+
+<section class="p-16 bg-white">
+
+<div class="max-w-xl mx-auto bg-gray-100 p-10 rounded-3xl shadow-lg">
+
+<h2 class="text-4xl font-bold text-center mb-10">
+Login / Signup
+</h2>
+
+<div class="space-y-6">
+
+<input
+type="email"
+id="loginEmail"
+placeholder="Enter Email"
+class="w-full p-4 rounded-2xl border">
+
+<input
+type="password"
+id="loginPassword"
+placeholder="Enter Password"
+class="w-full p-4 rounded-2xl border">
+
+<button
+onclick="signup()"
+class="w-full bg-blue-600 text-white py-4 rounded-2xl hover:scale-105 transition">
+
+Signup
+
+</button>
+
+<button
+onclick="login()"
+class="w-full bg-black text-white py-4 rounded-2xl hover:scale-105 transition">
+
+Login
+
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- ========================= -->
+<!-- POST PROPERTY SECTION -->
+<!-- ========================= -->
+
+<section class="p-16 bg-gray-100">
+
+<div class="max-w-4xl mx-auto bg-white p-10 rounded-3xl shadow-lg">
+
+<h2 class="text-4xl font-bold text-center mb-10">
+Post Your Property
+</h2>
+
+<div class="grid md:grid-cols-2 gap-6">
+
+<input
+type="text"
+id="propertyTitle"
+placeholder="Property Title"
+class="p-4 rounded-2xl border">
+
+<input
+type="text"
+id="propertyPrice"
+placeholder="Price"
+class="p-4 rounded-2xl border">
+
+<input
+type="text"
+id="propertyLocation"
+placeholder="Location"
+class="p-4 rounded-2xl border">
+
+<select
+id="propertyType"
+class="p-4 rounded-2xl border">
+
+<option>Property Type</option>
+<option>Villa</option>
+<option>Apartment</option>
+<option>Plot</option>
+<option>Office</option>
+
+</select>
+
+<input
+type="text"
+id="propertyArea"
+placeholder="Area (sqft)"
+class="p-4 rounded-2xl border">
+
+<input
+type="text"
+id="propertyBHK"
+placeholder="BHK"
+class="p-4 rounded-2xl border">
+
+</div>
+
+<textarea
+id="propertyDescription"
+placeholder="Describe Property"
+rows="5"
+class="w-full mt-6 p-4 rounded-2xl border"></textarea>
+
+<input
+type="file"
+id="propertyImage"
+class="w-full mt-6 p-4 rounded-2xl border bg-white">
+
+<button
+onclick="postProperty()"
+class="w-full mt-6 bg-blue-600 text-white py-4 rounded-2xl hover:scale-105 transition">
+
+Post Property
+
+</button>
+
+</div>
+
+</section>
+
+<!-- ========================= -->
+<!-- PROPERTY LISTINGS -->
+<!-- ========================= -->
+
+<section class="p-16 bg-white">
+
+<h2 class="text-5xl font-bold text-center mb-12">
+Latest Properties
+</h2>
+
+<div
+id="propertyContainer"
+class="grid md:grid-cols-3 gap-8">
+
+</div>
+
+</section>
+
+<!-- ========================= -->
+<!-- FIREBASE -->
+<!-- ========================= -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+
+apiKey: "YOUR_API_KEY",
+
+authDomain: "YOUR_AUTH_DOMAIN",
+
+projectId: "YOUR_PROJECT_ID",
+
+storageBucket: "YOUR_STORAGE_BUCKET",
+
+messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+
+appId: "YOUR_APP_ID"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+const auth = getAuth(app);
+
+window.signup = async function(){
+
+const email =
+document.getElementById("loginEmail").value;
+
+const password =
+document.getElementById("loginPassword").value;
+
+try{
+
+await createUserWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+alert("Signup Successful 🚀");
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+}
+
+window.login = async function(){
+
+const email =
+document.getElementById("loginEmail").value;
+
+const password =
+document.getElementById("loginPassword").value;
+
+try{
+
+await signInWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+alert("Login Successful 🔥");
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+}
+
+window.postProperty = async function(){
+
+const title =
+document.getElementById("propertyTitle").value;
+
+const price =
+document.getElementById("propertyPrice").value;
+
+const location =
+document.getElementById("propertyLocation").value;
+
+const type =
+document.getElementById("propertyType").value;
+
+const area =
+document.getElementById("propertyArea").value;
+
+const bhk =
+document.getElementById("propertyBHK").value;
+
+const description =
+document.getElementById("propertyDescription").value;
+
+try{
+
+await addDoc(collection(db,"properties"),{
+
+title,
+price,
+location,
+type,
+area,
+bhk,
+description
+
+});
+
+alert("Property Posted Successfully 🚀");
+
+loadProperties();
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+}
+
+async function loadProperties(){
+
+const propertyContainer =
+document.getElementById("propertyContainer");
+
+propertyContainer.innerHTML = "";
+
+const querySnapshot =
+await getDocs(collection(db,"properties"));
+
+querySnapshot.forEach((doc)=>{
+
+const data = doc.data();
+
+propertyContainer.innerHTML += `
+
+<div class="bg-gray-100 rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition">
+
+<img
+src="https://images.unsplash.com/photo-1600585154526-990dced4db0d"
+class="h-64 w-full object-cover">
+
+<div class="p-6">
+
+<h3 class="text-2xl font-bold">
+${data.title}
+</h3>
+
+<p class="text-gray-500 mt-2">
+${data.location}
+</p>
+
+<p class="mt-4 font-bold text-blue-600 text-2xl">
+₹ ${data.price}
+</p>
+
+<div class="flex justify-between mt-4">
+
+<p>${data.bhk}</p>
+
+<p>${data.area} sqft</p>
+
+</div>
+
+<p class="mt-4 text-gray-600">
+${data.description}
+</p>
+
+<div class="flex gap-4 mt-6">
+
+<a
+href="tel:+919876543210"
+class="bg-blue-600 text-white px-5 py-3 rounded-xl">
+
+Call
+
+</a>
+
+<a
+href="https://wa.me/919876543210"
+target="_blank"
+class="bg-green-500 text-white px-5 py-3 rounded-xl">
+
+WhatsApp
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+loadProperties();
+
+</script>
